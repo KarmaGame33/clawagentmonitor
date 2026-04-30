@@ -118,13 +118,16 @@ pub fn build_snapshot(status: &StatusAll, running_tasks: Option<&TasksList>) -> 
                 let id = a.id.clone();
                 let name = a.name.clone().unwrap_or_else(|| id.clone());
                 let model = model_per_agent.get(&id).cloned();
-                let last_age = a.last_active_age_ms.or_else(|| last_age_per_agent.get(&id).copied());
+                let last_age = a
+                    .last_active_age_ms
+                    .or_else(|| last_age_per_agent.get(&id).copied());
                 let running = *running_per_agent.get(&id).unwrap_or(&0);
                 let stale_for_agent = status.task_audit.by_code.stale_running > 0
                     && running == 0
                     && last_age.map(|a| a > 60_000).unwrap_or(false);
                 let (status_color, note) = classify(
-                    /* enabled */ status
+                    /* enabled */
+                    status
                         .heartbeat
                         .agents
                         .iter()

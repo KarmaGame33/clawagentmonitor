@@ -52,11 +52,21 @@ impl Default for WatchdogConfig {
 #[serde(tag = "kind", rename_all = "snake_case")]
 pub enum WatchdogEvent {
     Started,
-    Probe { ok: bool, ts_ms: i64 },
-    RestartAttempted { report_summary: String, final_ok: bool },
-    CrashLoopPause { until_ms: i64 },
+    Probe {
+        ok: bool,
+        ts_ms: i64,
+    },
+    RestartAttempted {
+        report_summary: String,
+        final_ok: bool,
+    },
+    CrashLoopPause {
+        until_ms: i64,
+    },
     Stopped,
-    Error { message: String },
+    Error {
+        message: String,
+    },
 }
 
 pub struct WatchdogHandle {
@@ -176,8 +186,7 @@ fn now_ms() -> i64 {
 /// (lock, journal, history). Utilise `dirs::state_dir` sous Linux,
 /// `dirs::data_local_dir` sous macOS/Windows.
 pub fn state_dir() -> Option<PathBuf> {
-    let base = dirs::state_dir()
-        .or_else(dirs::data_local_dir)?;
+    let base = dirs::state_dir().or_else(dirs::data_local_dir)?;
     Some(base.join("clawagentmonitor"))
 }
 

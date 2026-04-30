@@ -299,7 +299,10 @@ mod tests {
         assert!(t.count > 0);
         assert!(!t.tasks.is_empty());
         let first = &t.tasks[0];
-        assert!(matches!(first.runtime.as_str(), "subagent" | "cli" | "cron" | "acp"));
+        assert!(matches!(
+            first.runtime.as_str(),
+            "subagent" | "cli" | "cron" | "acp"
+        ));
     }
 
     #[test]
@@ -310,8 +313,10 @@ mod tests {
 
     #[test]
     fn agent_id_hint_extraction() {
-        let mut t = TaskEntry::default();
-        t.owner_key = Some("agent:ada:subagent:foo".into());
+        let t = TaskEntry {
+            owner_key: Some("agent:ada:subagent:foo".into()),
+            ..TaskEntry::default()
+        };
         assert_eq!(t.agent_id_hint(), Some("ada"));
     }
 }

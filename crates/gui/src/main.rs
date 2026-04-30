@@ -16,9 +16,7 @@ use claw_core::agent_state::{build_snapshot, AgentStatus, StatusSnapshot};
 use claw_core::cli::ClawCli;
 use claw_core::config::AppConfig;
 use claw_core::gateway::{restart_with_escalation, RestartMode};
-use claw_core::watchdog::{
-    spawn as spawn_watchdog, WatchdogConfig, WatchdogEvent, WatchdogHandle,
-};
+use claw_core::watchdog::{spawn as spawn_watchdog, WatchdogConfig, WatchdogEvent, WatchdogHandle};
 use claw_core::{autostart, watchdog};
 use slint::{CloseRequestResponse, ComponentHandle, ModelRc, SharedString, VecModel};
 use tokio::sync::Mutex;
@@ -27,7 +25,6 @@ mod notify;
 mod tray;
 
 #[cfg(target_os = "linux")]
-use ksni;
 
 slint::include_modules!();
 
@@ -144,11 +141,7 @@ fn main() -> Result<()> {
 // Bindings des callbacks UI
 // ============================================================================
 
-fn bind_restart_button(
-    app: &MainWindow,
-    state: &Arc<AppState>,
-    rt: tokio::runtime::Handle,
-) {
+fn bind_restart_button(app: &MainWindow, state: &Arc<AppState>, rt: tokio::runtime::Handle) {
     let app_weak = app.as_weak();
     let state = state.clone();
     app.on_restart_gateway(move || {
@@ -162,7 +155,12 @@ fn bind_restart_button(
             } else {
                 RestartMode::Safe
             };
-            push_log(&state, &app_weak, "info", format!("restart manuel ({mode:?})"));
+            push_log(
+                &state,
+                &app_weak,
+                "info",
+                format!("restart manuel ({mode:?})"),
+            );
             set_restart_in_progress(&app_weak, true);
             let cli = state.cli.clone();
             let result = rt2
@@ -175,7 +173,13 @@ fn bind_restart_button(
                     let summary = report
                         .steps
                         .iter()
-                        .map(|s| format!("{}={}", s.action, if s.probe_after_ok { "ok" } else { "ko" }))
+                        .map(|s| {
+                            format!(
+                                "{}={}",
+                                s.action,
+                                if s.probe_after_ok { "ok" } else { "ko" }
+                            )
+                        })
                         .collect::<Vec<_>>()
                         .join(" → ");
                     push_log(
@@ -205,11 +209,7 @@ fn bind_restart_button(
     });
 }
 
-fn bind_auto_restart_toggle(
-    app: &MainWindow,
-    state: &Arc<AppState>,
-    rt: tokio::runtime::Handle,
-) {
+fn bind_auto_restart_toggle(app: &MainWindow, state: &Arc<AppState>, rt: tokio::runtime::Handle) {
     let app_weak = app.as_weak();
     let state = state.clone();
     app.on_auto_restart_toggled(move |checked| {
@@ -273,11 +273,7 @@ fn bind_auto_aggressive_toggle(
     });
 }
 
-fn bind_notifications_toggle(
-    app: &MainWindow,
-    state: &Arc<AppState>,
-    rt: tokio::runtime::Handle,
-) {
+fn bind_notifications_toggle(app: &MainWindow, state: &Arc<AppState>, rt: tokio::runtime::Handle) {
     let app_weak = app.as_weak();
     let state = state.clone();
     app.on_notifications_toggled(move |checked| {
@@ -472,10 +468,8 @@ async fn poll_and_push(
     state: &Arc<AppState>,
 ) {
     let started = std::time::Instant::now();
-    let (status_res, tasks_res) = tokio::join!(
-        cli.status_all(),
-        cli.tasks_list(None, Some("running")),
-    );
+    let (status_res, tasks_res) =
+        tokio::join!(cli.status_all(), cli.tasks_list(None, Some("running")),);
 
     let snap = match (status_res, tasks_res) {
         (Ok(s), Ok(t)) => Some(build_snapshot(&s, Some(&t))),
@@ -614,7 +608,6 @@ fn push_log_sync(
     });
 }
 
-
 // ============================================================================
 // Tray icon (Linux only) + close-to-tray
 // ============================================================================
@@ -689,10 +682,7 @@ fn has_active_tray(state: &Arc<AppState>) -> bool {
     // try_lock : si le mutex est libre, on regarde ; sinon on assume oui
     // (c'est juste un best-effort pour décider entre hide et quit).
     match state.tray_handle.try_lock() {
-        Ok(slot) => slot
-            .as_ref()
-            .map(|h| !h.is_closed())
-            .unwrap_or(false),
+        Ok(slot) => slot.as_ref().map(|h| !h.is_closed()).unwrap_or(false),
         Err(_) => true,
     }
 }
@@ -703,7 +693,11 @@ fn has_active_tray(_state: &Arc<AppState>) -> bool {
 }
 
 /// Pousse les nouveautés du snapshot vers le tray (icône + tooltip).
-fn refresh_tray_from_snapshot(rt: &tokio::runtime::Handle, state: &Arc<AppState>, snap: &StatusSnapshot) {
+fn refresh_tray_from_snapshot(
+    rt: &tokio::runtime::Handle,
+    state: &Arc<AppState>,
+    snap: &StatusSnapshot,
+) {
     let _ = (rt, state, snap);
     #[cfg(target_os = "linux")]
     {
@@ -724,7 +718,11 @@ fn refresh_tray_from_snapshot(rt: &tokio::runtime::Handle, state: &Arc<AppState>
 }
 
 /// Pousse l'état d'auto-restart au tray (depuis les bind_*_toggled).
-fn refresh_tray_auto_restart(rt: &tokio::runtime::Handle, state: &Arc<AppState>, auto_restart: bool) {
+fn refresh_tray_auto_restart(
+    rt: &tokio::runtime::Handle,
+    state: &Arc<AppState>,
+    auto_restart: bool,
+) {
     let _ = (rt, state, auto_restart);
     #[cfg(target_os = "linux")]
     {

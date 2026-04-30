@@ -67,8 +67,8 @@ impl AppConfig {
 
     /// Sauvegarde sur disque (crée le dossier si besoin).
     pub fn save(&self) -> Result<()> {
-        let path = Self::config_path()
-            .context("could not resolve config path (state_dir unavailable)")?;
+        let path =
+            Self::config_path().context("could not resolve config path (state_dir unavailable)")?;
         if let Some(parent) = path.parent() {
             std::fs::create_dir_all(parent)
                 .with_context(|| format!("creating config dir {}", parent.display()))?;

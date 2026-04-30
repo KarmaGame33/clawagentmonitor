@@ -54,11 +54,8 @@ impl ClawCli {
     /// channels + sessions + memory + audit ; quand le gateway est UP elle
     /// peut prendre 30s+ sur une grosse install.
     pub async fn status_all(&self) -> Result<StatusAll> {
-        self.run_json(
-            &["status", "--all", "--json"],
-            Duration::from_secs(45),
-        )
-        .await
+        self.run_json(&["status", "--all", "--json"], Duration::from_secs(45))
+            .await
     }
 
     /// Liste des tâches. `runtime` peut être `Some("subagent")`, `Some("cli")`, etc.
@@ -102,11 +99,8 @@ impl ClawCli {
 
     /// Réinstallation forcée du service (palier 3, dernier recours).
     pub async fn gateway_install_force(&self) -> Result<()> {
-        self.run_silent(
-            &["gateway", "install", "--force"],
-            Duration::from_secs(60),
-        )
-        .await
+        self.run_silent(&["gateway", "install", "--force"], Duration::from_secs(60))
+            .await
     }
 
     async fn run_json<S, T>(&self, args: &[S], deadline: Duration) -> Result<T>
@@ -141,11 +135,7 @@ impl ClawCli {
         }
     }
 
-    async fn run_capture<S>(
-        &self,
-        args: &[S],
-        deadline: Duration,
-    ) -> Result<std::process::Output>
+    async fn run_capture<S>(&self, args: &[S], deadline: Duration) -> Result<std::process::Output>
     where
         S: AsRef<OsStr>,
     {

@@ -134,11 +134,7 @@ async fn run_step(
         Ok(()) => {
             step.success = true;
             step.probe_after_ok = probe_with_retries(cli, 3, Duration::from_secs(5)).await;
-            info!(
-                action,
-                probe_after_ok = step.probe_after_ok,
-                "step done"
-            );
+            info!(action, probe_after_ok = step.probe_after_ok, "step done");
         }
         Err(e) => {
             step.error = Some(e.to_string());
