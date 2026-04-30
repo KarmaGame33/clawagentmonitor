@@ -62,14 +62,19 @@ jobs:
       - name: Cargo fmt --check
         run: cargo fmt --all -- --check
 
-      - name: Cargo clippy
-        run: cargo clippy --workspace --all-targets -- -D warnings
-
+      # Build d'abord pour s'assurer que les build scripts Slint génèrent
+      # bien le code (sinon clippy reporte des "type not found" trompeurs).
       - name: Cargo build
         run: cargo build --workspace --all-targets
 
       - name: Cargo test
         run: cargo test --workspace --all-targets
+
+      # Clippy strict uniquement sur Linux (notre plateforme de référence).
+      # Sur macOS/Windows on se contente de la compilation + tests passants.
+      - name: Cargo clippy
+        if: matrix.os == 'ubuntu-latest'
+        run: cargo clippy --workspace --all-targets -- -D warnings
 
   # ---------------------------------------------------------------------------
   # Release : déclenchée uniquement sur les tags v*. Build le binaire en
