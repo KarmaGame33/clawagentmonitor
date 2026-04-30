@@ -1,0 +1,106 @@
+import { Button, VerticalBox, HorizontalBox } from "std-widgets.slint";
+
+export struct AgentInfo {
+    id: string,
+    name: string,
+    model: string,
+    status: string,
+}
+
+export component MainWindow inherits Window {
+    title: "ClawAgentMonitor";
+    preferred-width: 720px;
+    preferred-height: 480px;
+    background: #0f172a;
+
+    in property <[AgentInfo]> agents;
+    in property <string> gateway-status: "unknown";
+    callback restart-gateway();
+
+    VerticalBox {
+        spacing: 10px;
+        padding: 14px;
+
+        // Header
+        HorizontalBox {
+            alignment: stretch;
+            spacing: 12px;
+
+            Rectangle {
+                background: gateway-status == "ok" ? #064e3b
+                          : gateway-status == "down" ? #7f1d1d
+                          : #374151;
+                border-radius: 6px;
+                horizontal-stretch: 1;
+                HorizontalBox {
+                    padding: 10px;
+                    Text {
+                        text: "Gateway : " + gateway-status;
+                        color: white;
+                        font-size: 14px;
+                        vertical-alignment: center;
+                    }
+                }
+            }
+
+            Button {
+                text: "Relancer Gateway";
+                enabled: gateway-status != "ok";
+                clicked => { restart-gateway() }
+            }
+        }
+
+        // Liste agents
+        for agent in agents: Rectangle {
+            background: #1f2937;
+            border-radius: 6px;
+            height: 64px;
+
+            HorizontalBox {
+                padding: 12px;
+                spacing: 12px;
+                alignment: start;
+
+                Rectangle {
+                    width: 18px;
+                    height: 18px;
+                    border-radius: 9px;
+                    y: (parent.height - self.height) / 2;
+                    background: agent.status == "green" ? #10b981
+                              : agent.status == "orange" ? #f59e0b
+                              : agent.status == "red" ? #ef4444
+                              : #6b7280;
+                }
+
+                VerticalBox {
+                    spacing: 2px;
+                    Text {
+                        text: agent.name;
+                        color: white;
+                        font-size: 15px;
+                        font-weight: 600;
+                    }
+                    Text {
+                        text: agent.id + " · " + agent.model;
+                        color: #9ca3af;
+                        font-size: 11px;
+                    }
+                }
+            }
+        }
+
+        // Footer
+        Rectangle {
+            height: 24px;
+            HorizontalBox {
+                Text {
+                    text: "ClawAgentMonitor (scaffolding) - donnees factices";
+                    color: #6b7280;
+                    font-size: 10px;
+                    horizontal-alignment: right;
+                    vertical-alignment: center;
+                }
+            }
+        }
+    }
+}

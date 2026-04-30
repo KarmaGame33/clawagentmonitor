@@ -1,0 +1,20 @@
+[package]
+name = "clawagentmonitor"
+description = "Desktop monitor for OpenClaw agents"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+default-run = "clawagentmonitor"
+
+[dependencies]
+anyhow = { workspace = true }
+slint = { workspace = true }
+tokio = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+claw-core = { workspace = true }
+
+[build-dependencies]
+slint-build = { workspace = true }
