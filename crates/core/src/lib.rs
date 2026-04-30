@@ -8,9 +8,13 @@
 //! - [`agent_state`] : heuristique vert/orange/rouge/gris.
 //! - [`gateway`] : probe + restart (escalade non-destructive).
 //! - [`watchdog`] : boucle tokio in-process avec anti crash-loop.
+//! - [`config`] : préférences utilisateur persistées (auto-restart, auto-launch, …).
+//! - [`autostart`] : wrapper cross-platform pour le démarrage au login.
 
 pub mod agent_state;
+pub mod autostart;
 pub mod cli;
+pub mod config;
 pub mod gateway;
 pub mod models;
 pub mod watchdog;

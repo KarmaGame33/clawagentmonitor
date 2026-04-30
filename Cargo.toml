@@ -22,6 +22,7 @@ chrono = { version = "0.4", default-features = false, features = ["clock", "serd
 dirs = "5"
 reqwest = { version = "0.12", default-features = false, features = ["rustls-tls"] }
 thiserror = "1"
+auto-launch = "0.6"
 claw-core = { path = "crates/core" }
 
 [profile.release]
