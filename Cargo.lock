@@ -790,6 +790,7 @@ name = "clawagentmonitor"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "chrono",
  "claw-core",
  "slint",
  "slint-build",

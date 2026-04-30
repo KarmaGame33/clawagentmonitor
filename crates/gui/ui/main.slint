@@ -1,101 +1,193 @@
-import { Button, VerticalBox, HorizontalBox } from "std-widgets.slint";
+import { Button, VerticalBox, HorizontalBox, ScrollView } from "std-widgets.slint";
 
 export struct AgentInfo {
     id: string,
     name: string,
     model: string,
-    status: string,
+    status: string,            // "green" | "orange" | "red" | "gray"
+    note: string,
+    last-active: string,        // texte humain ("12s", "5min", ...)
+    sessions-count: int,
+    running-tasks: int,
 }
 
 export component MainWindow inherits Window {
     title: "ClawAgentMonitor";
-    preferred-width: 720px;
-    preferred-height: 480px;
+    preferred-width: 760px;
+    preferred-height: 540px;
     background: #0f172a;
 
+    // ------------ Properties exposées au Rust ------------
     in property <[AgentInfo]> agents;
-    in property <string> gateway-status: "unknown";
+    in property <string> gateway-status: "unknown";   // "up" | "down" | "unknown"
+    in property <string> gateway-runtime: "";
+    in property <string> last-update: "-";
+    in property <int> total-running-tasks: 0;
+    in property <int> total-failures: 0;
+    in property <bool> restart-in-progress: false;
+
+    // ------------ Callbacks vers Rust ------------
     callback restart-gateway();
 
     VerticalBox {
         spacing: 10px;
         padding: 14px;
 
-        // Header
+        // ====== Header ======
         HorizontalBox {
-            alignment: stretch;
             spacing: 12px;
 
+            // Badge gateway
             Rectangle {
-                background: gateway-status == "ok" ? #064e3b
+                background: gateway-status == "up" ? #064e3b
                           : gateway-status == "down" ? #7f1d1d
                           : #374151;
                 border-radius: 6px;
                 horizontal-stretch: 1;
                 HorizontalBox {
                     padding: 10px;
-                    Text {
-                        text: "Gateway : " + gateway-status;
-                        color: white;
-                        font-size: 14px;
-                        vertical-alignment: center;
+                    spacing: 8px;
+                    Rectangle {
+                        width: 12px;
+                        height: 12px;
+                        border-radius: 6px;
+                        y: (parent.height - self.height) / 2;
+                        background: gateway-status == "up" ? #10b981
+                                  : gateway-status == "down" ? #ef4444
+                                  : #9ca3af;
+                    }
+                    VerticalBox {
+                        spacing: 0;
+                        Text {
+                            text: "Gateway : " + gateway-status;
+                            color: white;
+                            font-size: 14px;
+                            font-weight: 600;
+                        }
+                        Text {
+                            text: gateway-runtime;
+                            color: #cbd5e1;
+                            font-size: 10px;
+                        }
                     }
                 }
             }
 
+            // Bouton de redémarrage
             Button {
-                text: "Relancer Gateway";
-                enabled: gateway-status != "ok";
+                text: restart-in-progress ? "Redémarrage..." : "Relancer Gateway";
+                enabled: !restart-in-progress && gateway-status != "up";
                 clicked => { restart-gateway() }
             }
         }
 
-        // Liste agents
-        for agent in agents: Rectangle {
-            background: #1f2937;
-            border-radius: 6px;
-            height: 64px;
-
+        // ====== Stats globales ======
+        Rectangle {
+            background: #1e293b;
+            border-radius: 4px;
+            height: 32px;
             HorizontalBox {
-                padding: 12px;
-                spacing: 12px;
-                alignment: start;
-
-                Rectangle {
-                    width: 18px;
-                    height: 18px;
-                    border-radius: 9px;
-                    y: (parent.height - self.height) / 2;
-                    background: agent.status == "green" ? #10b981
-                              : agent.status == "orange" ? #f59e0b
-                              : agent.status == "red" ? #ef4444
-                              : #6b7280;
+                padding: 8px;
+                Text {
+                    text: total-running-tasks + " tâche" + (total-running-tasks > 1 ? "s" : "")
+                          + " en cours · " + total-failures + " échec" + (total-failures > 1 ? "s" : "")
+                          + " (cumul)";
+                    color: #cbd5e1;
+                    font-size: 11px;
+                    vertical-alignment: center;
                 }
+            }
+        }
 
-                VerticalBox {
-                    spacing: 2px;
-                    Text {
-                        text: agent.name;
-                        color: white;
-                        font-size: 15px;
-                        font-weight: 600;
-                    }
-                    Text {
-                        text: agent.id + " · " + agent.model;
-                        color: #9ca3af;
-                        font-size: 11px;
+        // ====== Liste des agents (scrollable) ======
+        ScrollView {
+            vertical-stretch: 1;
+            VerticalBox {
+                spacing: 6px;
+                for agent in agents: Rectangle {
+                    background: #1f2937;
+                    border-radius: 6px;
+                    height: 68px;
+                    HorizontalBox {
+                        padding: 12px;
+                        spacing: 12px;
+                        alignment: stretch;
+
+                        // Pictogramme coloré
+                        Rectangle {
+                            width: 18px;
+                            height: 18px;
+                            border-radius: 9px;
+                            y: (parent.height - self.height) / 2;
+                            background: agent.status == "green" ? #10b981
+                                      : agent.status == "orange" ? #f59e0b
+                                      : agent.status == "red" ? #ef4444
+                                      : #6b7280;
+                        }
+
+                        // Bloc texte principal
+                        VerticalBox {
+                            spacing: 2px;
+                            horizontal-stretch: 1;
+                            HorizontalBox {
+                                spacing: 8px;
+                                Text {
+                                    text: agent.name;
+                                    color: white;
+                                    font-size: 15px;
+                                    font-weight: 600;
+                                }
+                                Text {
+                                    text: "(" + agent.id + ")";
+                                    color: #94a3b8;
+                                    font-size: 11px;
+                                    vertical-alignment: center;
+                                }
+                            }
+                            Text {
+                                text: agent.note + " · " + agent.model;
+                                color: #cbd5e1;
+                                font-size: 11px;
+                            }
+                        }
+
+                        // Bloc texte droit (last-active + sessions)
+                        VerticalBox {
+                            horizontal-stretch: 0;
+                            spacing: 2px;
+                            Text {
+                                text: agent.last-active;
+                                color: #cbd5e1;
+                                font-size: 11px;
+                                horizontal-alignment: right;
+                            }
+                            Text {
+                                text: agent.sessions-count + " sessions";
+                                color: #64748b;
+                                font-size: 10px;
+                                horizontal-alignment: right;
+                            }
+                        }
                     }
                 }
             }
         }
 
-        // Footer
+        // ====== Footer ======
         Rectangle {
-            height: 24px;
+            height: 22px;
             HorizontalBox {
+                padding-left: 8px;
+                padding-right: 8px;
                 Text {
-                    text: "ClawAgentMonitor (scaffolding) - donnees factices";
-                    color: #6b7280;
+                    text: "ClawAgentMonitor v0.1.0";
+                    color: #64748b;
+                    font-size: 10px;
+                    vertical-alignment: center;
+                }
+                Text {
+                    text: "Dernière MAJ : " + last-update;
+                    color: #64748b;
                     font-size: 10px;
                     horizontal-alignment: right;
                     vertical-alignment: center;
