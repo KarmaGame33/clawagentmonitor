@@ -23,9 +23,9 @@ cargo run -p clawagentmonitor
 
 ## Plateformes ciblées
 
-- Linux (premier livrable, développé sur CachyOS / Arch)
-- macOS (à venir)
-- Windows (à venir)
+- Linux (seule plateforme supportée pour l'instant ; développé sur CachyOS / Arch)
+
+Le code est écrit en Rust + Slint, qui supportent nativement macOS et Windows. Un portage est techniquement possible et préparé (le module `tray` est `cfg(target_os = "linux")`-gated pour ne pas bloquer un build cross-OS), mais pas testé ni livré pour l'instant.
 
 ## Licence
 
