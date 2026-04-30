@@ -20,10 +20,14 @@ use claw_core::watchdog::{
     spawn as spawn_watchdog, WatchdogConfig, WatchdogEvent, WatchdogHandle,
 };
 use claw_core::{autostart, watchdog};
-use slint::{ComponentHandle, ModelRc, SharedString, VecModel};
+use slint::{CloseRequestResponse, ComponentHandle, ModelRc, SharedString, VecModel};
 use tokio::sync::Mutex;
 
 mod notify;
+mod tray;
+
+#[cfg(target_os = "linux")]
+use ksni;
 
 slint::include_modules!();
 
@@ -36,6 +40,8 @@ struct AppState {
     config: Mutex<AppConfig>,
     watchdog_handle: Mutex<Option<WatchdogHandle>>,
     log: Mutex<VecDeque<LogEntry>>,
+    #[cfg(target_os = "linux")]
+    tray_handle: Mutex<Option<ksni::Handle<tray::ClawTray>>>,
 }
 
 fn main() -> Result<()> {
@@ -89,6 +95,8 @@ fn main() -> Result<()> {
         config: Mutex::new(initial_config.clone()),
         watchdog_handle: Mutex::new(None),
         log: Mutex::new(VecDeque::with_capacity(LOG_MAX_ENTRIES)),
+        #[cfg(target_os = "linux")]
+        tray_handle: Mutex::new(None),
     });
 
     // Initialise les properties Slint depuis la config
@@ -113,14 +121,20 @@ fn main() -> Result<()> {
     {
         let app_weak = app.as_weak();
         let cli = state.cli.clone();
+        let rt_handle = rt.handle().clone();
+        let state_for_poll = state.clone();
         rt.spawn(async move {
-            poll_and_push(&cli, &app_weak).await;
+            poll_and_push(&cli, &app_weak, &rt_handle, &state_for_poll).await;
             loop {
                 tokio::time::sleep(Duration::from_secs(5)).await;
-                poll_and_push(&cli, &app_weak).await;
+                poll_and_push(&cli, &app_weak, &rt_handle, &state_for_poll).await;
             }
         });
     }
+
+    // ===== Tray icon (Linux only, best-effort) =====
+    start_tray_if_supported(&rt, &state, app.as_weak());
+    install_close_handler(&app, state.clone());
 
     app.run()?;
     Ok(())
@@ -203,6 +217,7 @@ fn bind_auto_restart_toggle(
         let state = state.clone();
         let rt = rt.clone();
         let rt_for_spawn = rt.clone();
+        refresh_tray_auto_restart(&rt, &state, checked);
         rt.spawn(async move {
             {
                 let mut cfg = state.config.lock().await;
@@ -450,7 +465,12 @@ fn should_notify(ev: &WatchdogEvent) -> Option<notify::Level> {
 // Polling périodique (status_all + tasks_list → snapshot)
 // ============================================================================
 
-async fn poll_and_push(cli: &ClawCli, app_weak: &slint::Weak<MainWindow>) {
+async fn poll_and_push(
+    cli: &ClawCli,
+    app_weak: &slint::Weak<MainWindow>,
+    rt_handle: &tokio::runtime::Handle,
+    state: &Arc<AppState>,
+) {
     let started = std::time::Instant::now();
     let (status_res, tasks_res) = tokio::join!(
         cli.status_all(),
@@ -477,6 +497,7 @@ async fn poll_and_push(cli: &ClawCli, app_weak: &slint::Weak<MainWindow>) {
             elapsed_ms = started.elapsed().as_millis() as u64,
             "snapshot pushed to UI"
         );
+        refresh_tray_from_snapshot(rt_handle, state, &snap);
         push_snapshot_to_ui(app_weak, snap);
     }
 }
@@ -591,6 +612,130 @@ fn push_log_sync(
             });
         });
     });
+}
+
+
+// ============================================================================
+// Tray icon (Linux only) + close-to-tray
+// ============================================================================
+
+#[cfg(target_os = "linux")]
+fn start_tray_if_supported(
+    rt: &tokio::runtime::Runtime,
+    state: &Arc<AppState>,
+    app_weak: slint::Weak<MainWindow>,
+) {
+    let state = state.clone();
+    rt.spawn(async move {
+        match tray::start().await {
+            Ok((handle, mut rx)) => {
+                tracing::info!("tray icon started (ksni)");
+                {
+                    let mut slot = state.tray_handle.lock().await;
+                    *slot = Some(handle);
+                }
+                // Consume tray commands
+                while let Some(cmd) = rx.recv().await {
+                    match cmd {
+                        tray::TrayCommand::ShowWindow => {
+                            let weak = app_weak.clone();
+                            let _ = slint::invoke_from_event_loop(move || {
+                                if let Some(app) = weak.upgrade() {
+                                    let _ = app.window().show();
+                                }
+                            });
+                        }
+                        tray::TrayCommand::Quit => {
+                            let _ = slint::invoke_from_event_loop(|| {
+                                let _ = slint::quit_event_loop();
+                            });
+                        }
+                    }
+                }
+            }
+            Err(e) => {
+                tracing::warn!(error = %e, "tray icon could not start, continuing without");
+            }
+        }
+    });
+}
+
+#[cfg(not(target_os = "linux"))]
+fn start_tray_if_supported(
+    _rt: &tokio::runtime::Runtime,
+    _state: &Arc<AppState>,
+    _app_weak: slint::Weak<MainWindow>,
+) {
+    // pas de tray cross-platform pour l'instant
+}
+
+/// Au lieu de quitter quand on ferme la fenêtre, on la cache si le tray est
+/// disponible (sinon comportement par défaut : quit_event_loop).
+fn install_close_handler(app: &MainWindow, state: Arc<AppState>) {
+    app.window().on_close_requested(move || {
+        if has_active_tray(&state) {
+            tracing::info!("close requested, hiding window (tray is active)");
+            CloseRequestResponse::HideWindow
+        } else {
+            tracing::info!("close requested, no tray active, quitting app");
+            let _ = slint::quit_event_loop();
+            CloseRequestResponse::HideWindow
+        }
+    });
+}
+
+#[cfg(target_os = "linux")]
+fn has_active_tray(state: &Arc<AppState>) -> bool {
+    // try_lock : si le mutex est libre, on regarde ; sinon on assume oui
+    // (c'est juste un best-effort pour décider entre hide et quit).
+    match state.tray_handle.try_lock() {
+        Ok(slot) => slot
+            .as_ref()
+            .map(|h| !h.is_closed())
+            .unwrap_or(false),
+        Err(_) => true,
+    }
+}
+
+#[cfg(not(target_os = "linux"))]
+fn has_active_tray(_state: &Arc<AppState>) -> bool {
+    false
+}
+
+/// Pousse les nouveautés du snapshot vers le tray (icône + tooltip).
+fn refresh_tray_from_snapshot(rt: &tokio::runtime::Handle, state: &Arc<AppState>, snap: &StatusSnapshot) {
+    let _ = (rt, state, snap);
+    #[cfg(target_os = "linux")]
+    {
+        let state = state.clone();
+        let gw = match snap.gateway {
+            claw_core::agent_state::GatewayState::Up => tray::GatewayKind::Up,
+            claw_core::agent_state::GatewayState::Down => tray::GatewayKind::Down,
+            claw_core::agent_state::GatewayState::Unknown => tray::GatewayKind::Unknown,
+        };
+        let agents_running = snap.total_running_tasks as u32;
+        rt.spawn(async move {
+            let slot = state.tray_handle.lock().await;
+            if let Some(handle) = slot.as_ref() {
+                tray::update(handle, Some(gw), None, Some(agents_running)).await;
+            }
+        });
+    }
+}
+
+/// Pousse l'état d'auto-restart au tray (depuis les bind_*_toggled).
+fn refresh_tray_auto_restart(rt: &tokio::runtime::Handle, state: &Arc<AppState>, auto_restart: bool) {
+    let _ = (rt, state, auto_restart);
+    #[cfg(target_os = "linux")]
+    {
+        let state = state.clone();
+        rt.spawn(async move {
+            let slot = state.tray_handle.lock().await;
+            if let Some(handle) = slot.as_ref() {
+                tray::update(handle, None, Some(auto_restart), None).await;
+            }
+        });
+    }
 }
 
 // ============================================================================

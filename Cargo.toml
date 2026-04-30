@@ -24,6 +24,7 @@ reqwest = { version = "0.12", default-features = false, features = ["rustls-tls"
 thiserror = "1"
 auto-launch = "0.6"
 notify-rust = "4"
+ksni = { version = "0.3", default-features = false, features = ["async-io"] }
 claw-core = { path = "crates/core" }
 
 [profile.release]
