@@ -1,5 +1,7 @@
 # ClawAgentMonitor
 
+[![CI](https://github.com/KarmaGame33/clawagentmonitor/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/KarmaGame33/clawagentmonitor/actions/workflows/ci.yml)
+
 Application desktop cross-platform pour monitorer l'état des agents [OpenClaw](https://docs.openclaw.ai/) en temps réel, avec watchdog optionnel pour le Gateway.
 
 ## Statut
