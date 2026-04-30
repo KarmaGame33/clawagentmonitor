@@ -23,6 +23,8 @@ use claw_core::{autostart, watchdog};
 use slint::{ComponentHandle, ModelRc, SharedString, VecModel};
 use tokio::sync::Mutex;
 
+mod notify;
+
 slint::include_modules!();
 
 const LOG_MAX_ENTRIES: usize = 50;
@@ -93,6 +95,7 @@ fn main() -> Result<()> {
     app.set_auto_restart_enabled(initial_config.auto_restart_enabled);
     app.set_auto_aggressive_enabled(initial_config.auto_aggressive);
     app.set_start_at_login_enabled(initial_config.start_at_login);
+    app.set_notifications_enabled(initial_config.notifications_enabled);
 
     // Démarre le watchdog tout de suite si la config le demande
     if initial_config.auto_restart_enabled {
@@ -104,6 +107,7 @@ fn main() -> Result<()> {
     bind_auto_restart_toggle(&app, &state, rt.handle().clone());
     bind_auto_aggressive_toggle(&app, &state, rt.handle().clone());
     bind_start_at_login_toggle(&app, &state);
+    bind_notifications_toggle(&app, &state, rt.handle().clone());
 
     // ===== Polling périodique =====
     {
@@ -254,6 +258,42 @@ fn bind_auto_aggressive_toggle(
     });
 }
 
+fn bind_notifications_toggle(
+    app: &MainWindow,
+    state: &Arc<AppState>,
+    rt: tokio::runtime::Handle,
+) {
+    let app_weak = app.as_weak();
+    let state = state.clone();
+    app.on_notifications_toggled(move |checked| {
+        let app_weak = app_weak.clone();
+        let state = state.clone();
+        rt.spawn(async move {
+            {
+                let mut cfg = state.config.lock().await;
+                cfg.notifications_enabled = checked;
+                cfg.save_best_effort();
+            }
+            push_log(
+                &state,
+                &app_weak,
+                "info",
+                format!(
+                    "notifications : {}",
+                    if checked { "activées" } else { "désactivées" }
+                ),
+            );
+            if checked {
+                // Notification de feedback pour confirmer que ça marche
+                notify::show(
+                    notify::Level::Info,
+                    "Notifications activées · ClawAgentMonitor vous préviendra des incidents watchdog.",
+                );
+            }
+        });
+    });
+}
+
 fn bind_start_at_login_toggle(app: &MainWindow, state: &Arc<AppState>) {
     let app_weak = app.as_weak();
     let state = state.clone();
@@ -337,13 +377,19 @@ fn spawn_or_replace_watchdog(
             let mut handle_slot = state2.watchdog_handle.lock().await;
             *handle_slot = Some(handle);
         }
-        // Consommateur d'événements : alimente le journal de la GUI
+        // Consommateur d'événements : alimente le journal de la GUI + notifs desktop
         let state_consumer = state2.clone();
         let app_weak_consumer = app_weak2.clone();
         rt2.spawn(async move {
             while let Some(ev) = events.recv().await {
                 let (level, msg) = format_event(&ev);
-                push_log(&state_consumer, &app_weak_consumer, level, msg);
+                push_log(&state_consumer, &app_weak_consumer, level, msg.clone());
+                // Notification desktop (best-effort, gardée par config)
+                if state_consumer.config.lock().await.notifications_enabled {
+                    if let Some(notif_level) = should_notify(&ev) {
+                        notify::show(notif_level, &msg);
+                    }
+                }
             }
         });
     });
@@ -380,6 +426,23 @@ fn format_event(ev: &WatchdogEvent) -> (&'static str, String) {
             "crash-loop détecté, watchdog en pause 10 min".into(),
         ),
         WatchdogEvent::Error { message } => ("error", format!("erreur : {message}")),
+    }
+}
+
+/// Décide si un évènement watchdog mérite une notification desktop.
+/// On filtre volontairement les `Probe` (toutes les 5 min, déjà visibles
+/// dans le journal) pour ne pas spammer l'utilisateur.
+fn should_notify(ev: &WatchdogEvent) -> Option<notify::Level> {
+    match ev {
+        WatchdogEvent::Probe { .. } => None,
+        WatchdogEvent::Started | WatchdogEvent::Stopped => None,
+        WatchdogEvent::RestartAttempted { final_ok, .. } => Some(if *final_ok {
+            notify::Level::Info
+        } else {
+            notify::Level::Warn
+        }),
+        WatchdogEvent::CrashLoopPause { .. } => Some(notify::Level::Warn),
+        WatchdogEvent::Error { .. } => Some(notify::Level::Error),
     }
 }
 

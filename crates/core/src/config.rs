@@ -22,6 +22,9 @@ pub struct AppConfig {
     pub auto_aggressive: bool,
     /// Lance ClawAgentMonitor au login (via `auto-launch`).
     pub start_at_login: bool,
+    /// Affiche des notifications desktop sur les évènements watchdog importants
+    /// (restart tenté, crash-loop, erreur).
+    pub notifications_enabled: bool,
     /// Intervalle entre deux probes du watchdog (en secondes).
     pub watchdog_interval_secs: u64,
 }
@@ -32,6 +35,7 @@ impl Default for AppConfig {
             auto_restart_enabled: false,
             auto_aggressive: false,
             start_at_login: false,
+            notifications_enabled: true,
             watchdog_interval_secs: 300,
         }
     }
@@ -103,6 +107,7 @@ mod tests {
             auto_restart_enabled: true,
             auto_aggressive: true,
             start_at_login: false,
+            notifications_enabled: false,
             watchdog_interval_secs: 120,
         };
         let json = serde_json::to_string(&c).unwrap();
@@ -110,6 +115,7 @@ mod tests {
         assert!(back.auto_restart_enabled);
         assert!(back.auto_aggressive);
         assert!(!back.start_at_login);
+        assert!(!back.notifications_enabled);
         assert_eq!(back.watchdog_interval_secs, 120);
     }
 

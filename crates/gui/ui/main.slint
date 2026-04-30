@@ -36,6 +36,7 @@ export component MainWindow inherits Window {
     in-out property <bool> auto-restart-enabled: false;
     in-out property <bool> auto-aggressive-enabled: false;
     in-out property <bool> start-at-login-enabled: false;
+    in-out property <bool> notifications-enabled: true;
 
     // Journal du watchdog (lignes les plus récentes en haut)
     in property <[LogEntry]> watchdog-log;
@@ -45,6 +46,7 @@ export component MainWindow inherits Window {
     callback auto-restart-toggled(bool);
     callback auto-aggressive-toggled(bool);
     callback start-at-login-toggled(bool);
+    callback notifications-toggled(bool);
 
     VerticalBox {
         spacing: 8px;
@@ -217,6 +219,14 @@ export component MainWindow inherits Window {
                     toggled => {
                         start-at-login-enabled = self.checked;
                         start-at-login-toggled(self.checked);
+                    }
+                }
+                CheckBox {
+                    text: "Notifications";
+                    checked: notifications-enabled;
+                    toggled => {
+                        notifications-enabled = self.checked;
+                        notifications-toggled(self.checked);
                     }
                 }
             }

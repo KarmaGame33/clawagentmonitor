@@ -16,6 +16,7 @@ tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
 chrono = { workspace = true }
 claw-core = { workspace = true }
+notify-rust = { workspace = true }
 
 [build-dependencies]
 slint-build = { workspace = true }
