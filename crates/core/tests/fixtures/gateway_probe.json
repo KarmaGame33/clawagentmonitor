@@ -1,0 +1,628 @@
+{
+  "ok": true,
+  "degraded": false,
+  "capability": "admin_capable",
+  "ts": 1777562185449,
+  "durationMs": 1297,
+  "timeoutMs": 3000,
+  "primaryTargetId": "localLoopback",
+  "warnings": [],
+  "network": {
+    "localLoopbackUrl": "ws://127.0.0.1:18789",
+    "localTailnetUrl": null,
+    "tailnetIPv4": null
+  },
+  "discovery": {
+    "timeoutMs": 1200,
+    "count": 2,
+    "beacons": [
+      {
+        "instanceName": "cachyos-Karma (OpenClaw)",
+        "displayName": "cachyos-Karma",
+        "domain": "local.",
+        "host": "cachyos-Karma.local",
+        "lanHost": "cachyos-Karma.local",
+        "tailnetDns": null,
+        "gatewayPort": 18789,
+        "sshPort": null,
+        "wsUrl": "ws://cachyos-Karma.local:18789"
+      },
+      {
+        "instanceName": "cachyos-Karma (OpenClaw)",
+        "displayName": "cachyos-Karma",
+        "domain": "local.",
+        "host": "cachyos-Karma.local",
+        "lanHost": "cachyos-Karma.local",
+        "tailnetDns": null,
+        "gatewayPort": 18789,
+        "sshPort": null,
+        "wsUrl": "ws://cachyos-Karma.local:18789"
+      }
+    ]
+  },
+  "targets": [
+    {
+      "id": "localLoopback",
+      "kind": "localLoopback",
+      "url": "ws://127.0.0.1:18789",
+      "active": true,
+      "tunnel": null,
+      "connect": {
+        "ok": true,
+        "rpcOk": true,
+        "scopeLimited": false,
+        "latencyMs": 17,
+        "error": null,
+        "close": null
+      },
+      "auth": {
+        "role": "operator",
+        "scopes": [
+          "operator.admin",
+          "operator.read",
+          "operator.write"
+        ],
+        "capability": "admin_capable"
+      },
+      "self": {
+        "host": "cachyos-Karma",
+        "ip": "192.168.1.20",
+        "version": "2026.4.26",
+        "platform": "linux 7.0.2-2-cachyos"
+      },
+      "config": {
+        "path": "/home/karma/.openclaw/openclaw.json",
+        "exists": true,
+        "valid": true,
+        "issues": [],
+        "legacyIssues": [],
+        "gateway": {
+          "mode": "local",
+          "bind": "loopback",
+          "port": 18789,
+          "controlUiEnabled": null,
+          "controlUiBasePath": null,
+          "authMode": "token",
+          "authTokenConfigured": true,
+          "authPasswordConfigured": false,
+          "remoteUrl": null,
+          "remoteTokenConfigured": false,
+          "remotePasswordConfigured": false,
+          "tailscaleMode": "off"
+        },
+        "discovery": {
+          "wideAreaEnabled": null
+        }
+      },
+      "health": {
+        "ok": true,
+        "ts": 1777562180663,
+        "durationMs": 42,
+        "plugins": {
+          "loaded": [
+            "acpx",
+            "active-memory",
+            "alibaba",
+            "amazon-bedrock",
+            "amazon-bedrock-mantle",
+            "anthropic",
+            "anthropic-vertex",
+            "arcee",
+            "azure-speech",
+            "bonjour",
+            "browser",
+            "byteplus",
+            "cerebras",
+            "chutes",
+            "cloudflare-ai-gateway",
+            "comfy",
+            "copilot-proxy",
+            "deepgram",
+            "deepseek",
+            "device-pair",
+            "document-extract",
+            "elevenlabs",
+            "fal",
+            "fireworks",
+            "github-copilot",
+            "google",
+            "groq",
+            "huggingface",
+            "inworld",
+            "kilocode",
+            "kimi",
+            "litellm",
+            "lmstudio",
+            "memory-core",
+            "microsoft",
+            "microsoft-foundry",
+            "minimax",
+            "mistral",
+            "moonshot",
+            "nvidia",
+            "ollama",
+            "openai",
+            "opencode",
+            "opencode-go",
+            "openrouter",
+            "phone-control",
+            "qianfan",
+            "qqbot",
+            "qwen",
+            "runway",
+            "senseaudio",
+            "sglang",
+            "stepfun",
+            "synthetic",
+            "talk-voice",
+            "telegram",
+            "tencent",
+            "together",
+            "tts-local-cli",
+            "venice",
+            "vercel-ai-gateway",
+            "vllm",
+            "volcengine",
+            "voyage",
+            "vydra",
+            "web-readability",
+            "xai",
+            "xiaomi",
+            "zai"
+          ],
+          "errors": []
+        },
+        "channels": {
+          "telegram": {
+            "running": true,
+            "connected": true,
+            "restartPending": false,
+            "reconnectAttempts": 0,
+            "lastConnectedAt": 1777562150467,
+            "lastEventAt": 1777562150467,
+            "lastTransportActivityAt": 1777562150467,
+            "mode": "polling",
+            "accountId": "default",
+            "enabled": true,
+            "configured": true,
+            "lastProbeAt": 1777562180663,
+            "lastStartAt": null,
+            "lastStopAt": null,
+            "lastError": null,
+            "tokenSource": "none",
+            "accounts": {
+              "default": {
+                "running": true,
+                "connected": true,
+                "restartPending": false,
+                "reconnectAttempts": 0,
+                "lastConnectedAt": 1777562150467,
+                "lastEventAt": 1777562150467,
+                "lastTransportActivityAt": 1777562150467,
+                "mode": "polling",
+                "accountId": "default",
+                "enabled": true,
+                "configured": true,
+                "lastProbeAt": 1777562180663,
+                "lastStartAt": null,
+                "lastStopAt": null,
+                "lastError": null,
+                "tokenSource": "none"
+              }
+            }
+          }
+        },
+        "channelOrder": [
+          "telegram"
+        ],
+        "channelLabels": {
+          "telegram": "Telegram"
+        },
+        "heartbeatSeconds": 1800,
+        "defaultAgentId": "main",
+        "agents": [
+          {
+            "agentId": "main",
+            "name": "Hex",
+            "isDefault": true,
+            "heartbeat": {
+              "enabled": true,
+              "every": "30m",
+              "everyMs": 1800000,
+              "prompt": "Read HEARTBEAT.md if it exists (workspace context). Follow it strictly. Do not infer or repeat old tasks from prior chats. If nothing needs attention, reply HEARTBEAT_OK.",
+              "target": "none",
+              "ackMaxChars": 300
+            },
+            "sessions": {
+              "path": "/home/karma/.openclaw/agents/main/sessions/sessions.json",
+              "count": 40,
+              "recent": [
+                {
+                  "key": "agent:main:main",
+                  "updatedAt": 1777562159192,
+                  "age": 21424
+                },
+                {
+                  "key": "agent:main:dreaming-narrative-rem-d6b5b35572e4-1777543427524",
+                  "updatedAt": 1777543623956,
+                  "age": 18556660
+                },
+                {
+                  "key": "agent:main:dreaming-narrative-rem-ba940f55fa67-1777543351108",
+                  "updatedAt": 1777543557219,
+                  "age": 18623397
+                },
+                {
+                  "key": "agent:main:dreaming-narrative-light-d6b5b35572e4-1777543427524",
+                  "updatedAt": 1777543553325,
+                  "age": 18627291
+                },
+                {
+                  "key": "agent:main:dreaming-narrative-rem-e45fe5ad4980-1777543426302",
+                  "updatedAt": 1777543553257,
+                  "age": 18627359
+                }
+              ]
+            }
+          },
+          {
+            "agentId": "ada",
+            "name": "Ada",
+            "isDefault": false,
+            "heartbeat": {
+              "enabled": false,
+              "every": "disabled",
+              "everyMs": null,
+              "prompt": "Read HEARTBEAT.md if it exists (workspace context). Follow it strictly. Do not infer or repeat old tasks from prior chats. If nothing needs attention, reply HEARTBEAT_OK.",
+              "target": "none",
+              "ackMaxChars": 300
+            },
+            "sessions": {
+              "path": "/home/karma/.openclaw/agents/ada/sessions/sessions.json",
+              "count": 26,
+              "recent": [
+                {
+                  "key": "agent:ada:subagent:a8a5f6a1-4a2b-494d-bdf9-2de4d458ac19",
+                  "updatedAt": 1777561101711,
+                  "age": 1078907
+                },
+                {
+                  "key": "agent:ada:subagent:fb1db5c4-47ea-42a8-b5e2-7cf7e4815098",
+                  "updatedAt": 1777545965639,
+                  "age": 16214979
+                },
+                {
+                  "key": "agent:ada:subagent:1daff1e0-053b-47ff-8d9e-263072c221ce",
+                  "updatedAt": 1777488731010,
+                  "age": 73449608
+                },
+                {
+                  "key": "agent:ada:subagent:0660c3d3-ed30-45a2-b4a5-9a9244fd6763",
+                  "updatedAt": 1777480794169,
+                  "age": 81386449
+                },
+                {
+                  "key": "agent:ada:subagent:d70c6265-eeed-42e5-818c-0873a8e2360e",
+                  "updatedAt": 1777480698853,
+                  "age": 81481765
+                }
+              ]
+            }
+          },
+          {
+            "agentId": "matisse",
+            "name": "Matisse",
+            "isDefault": false,
+            "heartbeat": {
+              "enabled": false,
+              "every": "disabled",
+              "everyMs": null,
+              "prompt": "Read HEARTBEAT.md if it exists (workspace context). Follow it strictly. Do not infer or repeat old tasks from prior chats. If nothing needs attention, reply HEARTBEAT_OK.",
+              "target": "none",
+              "ackMaxChars": 300
+            },
+            "sessions": {
+              "path": "/home/karma/.openclaw/agents/matisse/sessions/sessions.json",
+              "count": 7,
+              "recent": [
+                {
+                  "key": "agent:matisse:subagent:53597bd1-2f16-4ffd-a0a3-a38f69892398",
+                  "updatedAt": 1777491342747,
+                  "age": 70837872
+                },
+                {
+                  "key": "agent:matisse:subagent:b095fc35-f53c-40f8-ba0f-df3b6e4e3469",
+                  "updatedAt": 1777490495285,
+                  "age": 71685334
+                },
+                {
+                  "key": "agent:matisse:subagent:54dd6dfc-d431-4379-ab2e-1c7712ee5515",
+                  "updatedAt": 1777394804015,
+                  "age": 167376604
+                },
+                {
+                  "key": "agent:matisse:subagent:fe2a3470-0109-4d1a-9d6b-3a3e15382f9f",
+                  "updatedAt": 1777199006323,
+                  "age": 363174296
+                },
+                {
+                  "key": "agent:matisse:subagent:cecdbafc-eb3a-4830-9ab3-6d25c8e23ff9",
+                  "updatedAt": 1777148618201,
+                  "age": 413562418
+                }
+              ]
+            }
+          },
+          {
+            "agentId": "fixit",
+            "name": "Fixit",
+            "isDefault": false,
+            "heartbeat": {
+              "enabled": false,
+              "every": "disabled",
+              "everyMs": null,
+              "prompt": "Read HEARTBEAT.md if it exists (workspace context). Follow it strictly. Do not infer or repeat old tasks from prior chats. If nothing needs attention, reply HEARTBEAT_OK.",
+              "target": "none",
+              "ackMaxChars": 300
+            },
+            "sessions": {
+              "path": "/home/karma/.openclaw/agents/fixit/sessions/sessions.json",
+              "count": 18,
+              "recent": [
+                {
+                  "key": "agent:fixit:subagent:5b2e07eb-02c3-41a2-b031-5d4f58e4e1ad",
+                  "updatedAt": 1777540891150,
+                  "age": 21289470
+                },
+                {
+                  "key": "agent:fixit:subagent:69adbebe-2bd4-44a7-bf50-d4c7d7a98dbb",
+                  "updatedAt": 1777394408780,
+                  "age": 167771840
+                },
+                {
+                  "key": "agent:fixit:subagent:77ef7e99-ceab-4b19-a582-05ce86fdedf2",
+                  "updatedAt": 1777380570754,
+                  "age": 181609866
+                },
+                {
+                  "key": "agent:fixit:subagent:0373c361-dba0-43b2-8f71-a52ed38c53f8",
+                  "updatedAt": 1777370267028,
+                  "age": 191913592
+                },
+                {
+                  "key": "agent:fixit:subagent:c6396740-999d-4311-9457-17fe767a3da5",
+                  "updatedAt": 1777213868886,
+                  "age": 348311734
+                }
+              ]
+            }
+          },
+          {
+            "agentId": "critix",
+            "name": "Critix",
+            "isDefault": false,
+            "heartbeat": {
+              "enabled": false,
+              "every": "disabled",
+              "everyMs": null,
+              "prompt": "Read HEARTBEAT.md if it exists (workspace context). Follow it strictly. Do not infer or repeat old tasks from prior chats. If nothing needs attention, reply HEARTBEAT_OK.",
+              "target": "none",
+              "ackMaxChars": 300
+            },
+            "sessions": {
+              "path": "/home/karma/.openclaw/agents/critix/sessions/sessions.json",
+              "count": 11,
+              "recent": [
+                {
+                  "key": "agent:critix:subagent:a5ad2bd3-c4cd-4cf2-95bb-b7db9e2b51f9",
+                  "updatedAt": 1777491593027,
+                  "age": 70587594
+                },
+                {
+                  "key": "agent:critix:subagent:33d0a139-e9bd-4ed2-8f0b-a4403c9e861e",
+                  "updatedAt": 1777491379576,
+                  "age": 70801045
+                },
+                {
+                  "key": "agent:critix:subagent:b59a350c-c7ce-4d94-ac77-f2d8a5ba840e",
+                  "updatedAt": 1777489147580,
+                  "age": 73033041
+                },
+                {
+                  "key": "agent:critix:subagent:def51866-ea74-4fe9-8e5b-752c7dbd1d1b",
+                  "updatedAt": 1777481010724,
+                  "age": 81169897
+                },
+                {
+                  "key": "agent:critix:subagent:bfd40b5a-bc31-4b46-8ace-bf6a096d4d56",
+                  "updatedAt": 1777480397144,
+                  "age": 81783477
+                }
+              ]
+            }
+          }
+        ],
+        "sessions": {
+          "path": "/home/karma/.openclaw/agents/main/sessions/sessions.json",
+          "count": 40,
+          "recent": [
+            {
+              "key": "agent:main:main",
+              "updatedAt": 1777562159192,
+              "age": 21424
+            },
+            {
+              "key": "agent:main:dreaming-narrative-rem-d6b5b35572e4-1777543427524",
+              "updatedAt": 1777543623956,
+              "age": 18556660
+            },
+            {
+              "key": "agent:main:dreaming-narrative-rem-ba940f55fa67-1777543351108",
+              "updatedAt": 1777543557219,
+              "age": 18623397
+            },
+            {
+              "key": "agent:main:dreaming-narrative-light-d6b5b35572e4-1777543427524",
+              "updatedAt": 1777543553325,
+              "age": 18627291
+            },
+            {
+              "key": "agent:main:dreaming-narrative-rem-e45fe5ad4980-1777543426302",
+              "updatedAt": 1777543553257,
+              "age": 18627359
+            }
+          ]
+        }
+      },
+      "summary": {
+        "runtimeVersion": "2026.4.26",
+        "heartbeat": {
+          "defaultAgentId": "main",
+          "agents": [
+            {
+              "agentId": "main",
+              "enabled": true,
+              "every": "30m",
+              "everyMs": 1800000
+            },
+            {
+              "agentId": "ada",
+              "enabled": false,
+              "every": "disabled",
+              "everyMs": null
+            },
+            {
+              "agentId": "critix",
+              "enabled": false,
+              "every": "disabled",
+              "everyMs": null
+            },
+            {
+              "agentId": "fixit",
+              "enabled": false,
+              "every": "disabled",
+              "everyMs": null
+            },
+            {
+              "agentId": "matisse",
+              "enabled": false,
+              "every": "disabled",
+              "everyMs": null
+            }
+          ]
+        },
+        "channelSummary": [
+          "Telegram: configured",
+          "  - default (token:config)"
+        ],
+        "queuedSystemEvents": [],
+        "tasks": {
+          "total": 170,
+          "active": 1,
+          "terminal": 169,
+          "failures": 44,
+          "byStatus": {
+            "queued": 0,
+            "running": 1,
+            "succeeded": 125,
+            "failed": 40,
+            "timed_out": 4,
+            "cancelled": 0,
+            "lost": 0
+          },
+          "byRuntime": {
+            "subagent": 64,
+            "acp": 0,
+            "cli": 102,
+            "cron": 4
+          }
+        },
+        "taskAudit": {
+          "total": 2,
+          "warnings": 1,
+          "errors": 1,
+          "byCode": {
+            "stale_queued": 0,
+            "stale_running": 1,
+            "lost": 0,
+            "delivery_failed": 1,
+            "missing_cleanup": 0,
+            "inconsistent_timestamps": 0
+          }
+        },
+        "sessions": {
+          "paths": [],
+          "count": 102,
+          "defaults": {
+            "model": null,
+            "contextTokens": null
+          },
+          "recent": [],
+          "byAgent": [
+            {
+              "agentId": "main",
+              "path": "[redacted]",
+              "count": 40,
+              "recent": []
+            },
+            {
+              "agentId": "ada",
+              "path": "[redacted]",
+              "count": 26,
+              "recent": []
+            },
+            {
+              "agentId": "critix",
+              "path": "[redacted]",
+              "count": 11,
+              "recent": []
+            },
+            {
+              "agentId": "fixit",
+              "path": "[redacted]",
+              "count": 18,
+              "recent": []
+            },
+            {
+              "agentId": "matisse",
+              "path": "[redacted]",
+              "count": 7,
+              "recent": []
+            }
+          ]
+        }
+      },
+      "presence": [
+        {
+          "host": "cachyos-Karma",
+          "ip": "192.168.1.20",
+          "version": "2026.4.26",
+          "platform": "linux 7.0.2-2-cachyos",
+          "deviceFamily": "Linux",
+          "modelIdentifier": "x64",
+          "mode": "gateway",
+          "reason": "self",
+          "text": "Gateway: cachyos-Karma (192.168.1.20) · app 2026.4.26 · mode gateway · reason self",
+          "ts": 1777562185249
+        },
+        {
+          "host": "cli",
+          "version": "dev",
+          "platform": "linux",
+          "mode": "probe",
+          "deviceId": "c46b6cfd1e9d80b3bb327442cabc6bf03d0cf9d578c7121ed6a714ce4ee0e446",
+          "roles": [
+            "operator"
+          ],
+          "scopes": [
+            "operator.read"
+          ],
+          "instanceId": "c46b6cfd1e9d80b3bb327442cabc6bf03d0cf9d578c7121ed6a714ce4ee0e446",
+          "reason": "connect",
+          "ts": 1777562185214,
+          "text": "Node: cli · mode probe"
+        }
+      ]
+    }
+  ]
+}
